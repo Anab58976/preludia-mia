@@ -85,12 +85,18 @@ export function MiaChat() {
 
   useEffect(() => {
     for (const message of messages) {
-      for (const part of message.parts as Array<Record<string, unknown>>) {
+      for (const rawPart of message.parts) {
+        const part = rawPart as {
+          type?: string;
+          state?: string;
+          toolCallId?: string;
+          input?: Record<string, unknown>;
+        };
         const type = String(part.type ?? "");
         const state = String(part.state ?? "");
         const toolCallId = String(part.toolCallId ?? "");
         if (state !== "output-available" || applied.current.has(toolCallId)) continue;
-        const inputData = part.input as Record<string, unknown> | undefined;
+        const inputData = part.input;
         if (!inputData) continue;
 
         if (type === "tool-criar_projeto") {
