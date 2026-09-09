@@ -101,33 +101,35 @@ export function MiaChat() {
 
         if (type === "tool-criar_projeto") {
           applied.current.add(toolCallId);
-          const nomeCliente = String(inputData.cliente ?? "");
+          const nomeCliente = String(inputData["cliente"] ?? "");
           const cliente =
             store.clients.find((c) =>
               c.name.toLowerCase().includes(nomeCliente.toLowerCase().slice(0, 8)),
             ) ?? store.clients[0];
+          if (!cliente) continue;
           store.addProject({
-            title: String(inputData.titulo ?? "Novo projeto"),
+            title: String(inputData["titulo"] ?? "Novo projeto"),
             clientId: cliente.id,
-            type: String(inputData.tipo ?? "Projeto musical"),
-            deadline: String(inputData.prazo ?? "2026-12-31"),
-            budget: Number(inputData.valor ?? 0),
+            type: String(inputData["tipo"] ?? "Projeto musical"),
+            deadline: String(inputData["prazo"] ?? "2026-12-31"),
+            budget: Number(inputData["valor"] ?? 0),
           });
           toast.success("A Mia criou um novo projeto.");
         }
 
         if (type === "tool-criar_tarefa") {
           applied.current.add(toolCallId);
-          const alvo = String(inputData.projeto ?? "").toLowerCase();
+          const alvo = String(inputData["projeto"] ?? "").toLowerCase();
           const projeto =
             store.projects.find(
               (p) => p.id === alvo || p.title.toLowerCase().includes(alvo.slice(0, 8)),
             ) ?? store.projects[0];
+          if (!projeto) continue;
           store.addTask({
             projectId: projeto.id,
-            title: String(inputData.titulo ?? "Nova tarefa"),
-            priority: (inputData.prioridade as Priority) ?? "Média",
-            dueDate: String(inputData.prazo ?? "2026-12-31"),
+            title: String(inputData["titulo"] ?? "Nova tarefa"),
+            priority: (inputData["prioridade"] as Priority) ?? "Média",
+            dueDate: String(inputData["prazo"] ?? "2026-12-31"),
           });
           toast.success("A Mia criou uma nova tarefa.");
         }
