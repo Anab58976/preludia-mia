@@ -216,7 +216,9 @@ export function MiaChat() {
                         return (
                           <Tool defaultOpen={false} key={index}>
                             <ToolHeader
-                              type={toolPart.type.replace("tool-", "").replace("_", " ")}
+                              type={
+                                toolPart.type.replace("_", " ") as `tool-${string}`
+                              }
                               state={toolPart.state as never}
                             />
                             <ToolContent>
