@@ -44,7 +44,7 @@ function EmBreve() {
 
       <section className="grid gap-4 md:grid-cols-2">
         {roadmap.map((item, index) => {
-          const Icone = icones[index % icones.length];
+          const Icone = icones[index % icones.length] ?? MessageCircle;
           return (
             <article key={item.title} className="rounded-xl border bg-card p-6">
               <div className="flex items-center justify-between">
