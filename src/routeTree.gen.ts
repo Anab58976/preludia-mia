@@ -10,14 +10,39 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EmBreveRouteImport } from './routes/em-breve'
+import { Route as FeedbacksRouteImport } from './routes/feedbacks'
+import { Route as FinanceiroRouteImport } from './routes/financeiro'
+import { Route as TarefasRouteImport } from './routes/tarefas'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ClientesIndexRouteImport } from './routes/clientes.index'
+import { Route as ClientesIdRouteImport } from './routes/clientes.$id'
 import { Route as ProjetosIndexRouteImport } from './routes/projetos.index'
 import { Route as ProjetosIdRouteImport } from './routes/projetos.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmBreveRoute = EmBreveRouteImport.update({
+  id: '/em-breve',
+  path: '/em-breve',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedbacksRoute = FeedbacksRouteImport.update({
+  id: '/feedbacks',
+  path: '/feedbacks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FinanceiroRoute = FinanceiroRouteImport.update({
+  id: '/financeiro',
+  path: '/financeiro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TarefasRoute = TarefasRouteImport.update({
+  id: '/tarefas',
+  path: '/tarefas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
@@ -28,6 +53,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
 const ClientesIndexRoute = ClientesIndexRouteImport.update({
   id: '/clientes/',
   path: '/clientes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientesIdRoute = ClientesIdRouteImport.update({
+  id: '/clientes/$id',
+  path: '/clientes/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProjetosIndexRoute = ProjetosIndexRouteImport.update({
@@ -43,14 +73,24 @@ const ProjetosIdRoute = ProjetosIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/em-breve': typeof EmBreveRoute
+  '/feedbacks': typeof FeedbacksRoute
+  '/financeiro': typeof FinanceiroRoute
+  '/tarefas': typeof TarefasRoute
   '/api/chat': typeof ApiChatRoute
+  '/clientes/$id': typeof ClientesIdRoute
   '/projetos/$id': typeof ProjetosIdRoute
   '/clientes/': typeof ClientesIndexRoute
   '/projetos/': typeof ProjetosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/em-breve': typeof EmBreveRoute
+  '/feedbacks': typeof FeedbacksRoute
+  '/financeiro': typeof FinanceiroRoute
+  '/tarefas': typeof TarefasRoute
   '/api/chat': typeof ApiChatRoute
+  '/clientes/$id': typeof ClientesIdRoute
   '/projetos/$id': typeof ProjetosIdRoute
   '/clientes': typeof ClientesIndexRoute
   '/projetos': typeof ProjetosIndexRoute
@@ -58,20 +98,50 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/em-breve': typeof EmBreveRoute
+  '/feedbacks': typeof FeedbacksRoute
+  '/financeiro': typeof FinanceiroRoute
+  '/tarefas': typeof TarefasRoute
   '/api/chat': typeof ApiChatRoute
+  '/clientes/$id': typeof ClientesIdRoute
   '/projetos/$id': typeof ProjetosIdRoute
   '/clientes/': typeof ClientesIndexRoute
   '/projetos/': typeof ProjetosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/chat' | '/projetos/$id' | '/clientes/' | '/projetos/'
+  fullPaths:
+    | '/'
+    | '/em-breve'
+    | '/feedbacks'
+    | '/financeiro'
+    | '/tarefas'
+    | '/api/chat'
+    | '/clientes/$id'
+    | '/projetos/$id'
+    | '/clientes/'
+    | '/projetos/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/chat' | '/projetos/$id' | '/clientes' | '/projetos'
+  to:
+    | '/'
+    | '/em-breve'
+    | '/feedbacks'
+    | '/financeiro'
+    | '/tarefas'
+    | '/api/chat'
+    | '/clientes/$id'
+    | '/projetos/$id'
+    | '/clientes'
+    | '/projetos'
   id:
     | '__root__'
     | '/'
+    | '/em-breve'
+    | '/feedbacks'
+    | '/financeiro'
+    | '/tarefas'
     | '/api/chat'
+    | '/clientes/$id'
     | '/projetos/$id'
     | '/clientes/'
     | '/projetos/'
@@ -79,7 +149,12 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  EmBreveRoute: typeof EmBreveRoute
+  FeedbacksRoute: typeof FeedbacksRoute
+  FinanceiroRoute: typeof FinanceiroRoute
+  TarefasRoute: typeof TarefasRoute
   ApiChatRoute: typeof ApiChatRoute
+  ClientesIdRoute: typeof ClientesIdRoute
   ProjetosIdRoute: typeof ProjetosIdRoute
   ClientesIndexRoute: typeof ClientesIndexRoute
   ProjetosIndexRoute: typeof ProjetosIndexRoute
@@ -94,6 +169,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/em-breve': {
+      id: '/em-breve'
+      path: '/em-breve'
+      fullPath: '/em-breve'
+      preLoaderRoute: typeof EmBreveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feedbacks': {
+      id: '/feedbacks'
+      path: '/feedbacks'
+      fullPath: '/feedbacks'
+      preLoaderRoute: typeof FeedbacksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/financeiro': {
+      id: '/financeiro'
+      path: '/financeiro'
+      fullPath: '/financeiro'
+      preLoaderRoute: typeof FinanceiroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tarefas': {
+      id: '/tarefas'
+      path: '/tarefas'
+      fullPath: '/tarefas'
+      preLoaderRoute: typeof TarefasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -106,6 +209,13 @@ declare module '@tanstack/react-router' {
       path: '/clientes'
       fullPath: '/clientes/'
       preLoaderRoute: typeof ClientesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clientes/$id': {
+      id: '/clientes/$id'
+      path: '/clientes/$id'
+      fullPath: '/clientes/$id'
+      preLoaderRoute: typeof ClientesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/projetos/': {
@@ -127,7 +237,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  EmBreveRoute: EmBreveRoute,
+  FeedbacksRoute: FeedbacksRoute,
+  FinanceiroRoute: FinanceiroRoute,
+  TarefasRoute: TarefasRoute,
   ApiChatRoute: ApiChatRoute,
+  ClientesIdRoute: ClientesIdRoute,
   ProjetosIdRoute: ProjetosIdRoute,
   ClientesIndexRoute: ClientesIndexRoute,
   ProjetosIndexRoute: ProjetosIndexRoute,
