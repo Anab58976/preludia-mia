@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ComecarRouteImport } from './routes/comecar'
 import { Route as EmBreveRouteImport } from './routes/em-breve'
 import { Route as FeedbacksRouteImport } from './routes/feedbacks'
 import { Route as FinanceiroRouteImport } from './routes/financeiro'
@@ -24,6 +25,11 @@ import { Route as ProjetosIdRouteImport } from './routes/projetos.$id'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComecarRoute = ComecarRouteImport.update({
+  id: '/comecar',
+  path: '/comecar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmBreveRoute = EmBreveRouteImport.update({
@@ -79,6 +85,7 @@ const ProjetosIdRoute = ProjetosIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/comecar': typeof ComecarRoute
   '/em-breve': typeof EmBreveRoute
   '/feedbacks': typeof FeedbacksRoute
   '/financeiro': typeof FinanceiroRoute
@@ -92,6 +99,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/comecar': typeof ComecarRoute
   '/em-breve': typeof EmBreveRoute
   '/feedbacks': typeof FeedbacksRoute
   '/financeiro': typeof FinanceiroRoute
@@ -106,6 +114,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/comecar': typeof ComecarRoute
   '/em-breve': typeof EmBreveRoute
   '/feedbacks': typeof FeedbacksRoute
   '/financeiro': typeof FinanceiroRoute
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/comecar'
     | '/em-breve'
     | '/feedbacks'
     | '/financeiro'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/comecar'
     | '/em-breve'
     | '/feedbacks'
     | '/financeiro'
@@ -147,6 +158,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/comecar'
     | '/em-breve'
     | '/feedbacks'
     | '/financeiro'
@@ -161,6 +173,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ComecarRoute: typeof ComecarRoute
   EmBreveRoute: typeof EmBreveRoute
   FeedbacksRoute: typeof FeedbacksRoute
   FinanceiroRoute: typeof FinanceiroRoute
@@ -180,6 +193,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/comecar': {
+      id: '/comecar'
+      path: '/comecar'
+      fullPath: '/comecar'
+      preLoaderRoute: typeof ComecarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/em-breve': {
@@ -257,6 +277,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ComecarRoute: ComecarRoute,
   EmBreveRoute: EmBreveRoute,
   FeedbacksRoute: FeedbacksRoute,
   FinanceiroRoute: FinanceiroRoute,
