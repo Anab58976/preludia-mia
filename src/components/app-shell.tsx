@@ -14,6 +14,7 @@ import type { ReactNode } from "react";
 import { MiaChat } from "@/components/mia-chat";
 import { MiaAvatar } from "@/components/mia-avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { ReadPageButton } from "@/components/read-page-button";
 
 const nav = [
   { to: "/", label: "Painel", icon: LayoutDashboard },
