@@ -13,6 +13,7 @@ import type { ReactNode } from "react";
 
 import { MiaChat } from "@/components/mia-chat";
 import { MiaAvatar } from "@/components/mia-avatar";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const nav = [
   { to: "/", label: "Painel", icon: LayoutDashboard },
@@ -80,7 +81,8 @@ export function AppShell({ children }: { children: ReactNode }) {
             Quarta-feira, 9 de setembro de 2026
           </div>
           <div className="flex items-center gap-3">
-            <div className="text-right">
+            <ThemeToggle />
+            <div className="hidden text-right sm:block">
               <p className="text-sm leading-tight font-medium">Julia Alcassa</p>
               <p className="text-xs text-muted-foreground">Compositora e arranjadora</p>
             </div>

@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Quote, Save } from "lucide-react";
+import { Keyboard, Loader2, Mic, Quote, Save, Square } from "lucide-react";
 import { toast } from "sonner";
 
 import { MiaAvatar } from "@/components/mia-avatar";
 import { analisarFeedback, type FeedbackAnalysis } from "@/lib/feedback.functions";
 import { useStore } from "@/lib/store";
 import { fullDate, TODAY } from "@/lib/format";
+import { useSpeechInput } from "@/lib/use-speech-input";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/feedbacks")({
   head: () => ({
@@ -36,6 +38,10 @@ function Feedbacks() {
   const [autor, setAutor] = useState("");
   const [carregando, setCarregando] = useState(false);
   const [analise, setAnalise] = useState<FeedbackAnalysis | null>(null);
+  const [modo, setModo] = useState<"escrever" | "falar">("escrever");
+  const voz = useSpeechInput((trecho) =>
+    setTexto((atual) => (atual ? `${atual.trim()} ${trecho}` : trecho)),
+  );
 
   const projeto = store.projectById(projetoId);
 
@@ -116,6 +122,37 @@ function Feedbacks() {
             </label>
           </div>
 
+          <div
+            role="radiogroup"
+            aria-label="Como enviar a mensagem do cliente"
+            className="mt-4 flex items-center gap-1 rounded-full border bg-secondary/60 p-1"
+          >
+            {(
+              [
+                { value: "escrever", label: "Escrever", icon: Keyboard },
+                { value: "falar", label: "Falar", icon: Mic },
+              ] as const
+            ).map(({ value, label, icon: Icon }) => (
+              <button
+                key={value}
+                type="button"
+                role="radio"
+                aria-checked={modo === value}
+                onClick={() => {
+                  setModo(value);
+                  if (value === "escrever" && voz.gravando) voz.parar();
+                }}
+                className={cn(
+                  "inline-flex min-h-9 flex-1 items-center justify-center gap-2 rounded-full px-3 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+                  modo === value && "bg-card text-foreground shadow-sm",
+                )}
+              >
+                <Icon className="size-4" aria-hidden />
+                {label}
+              </button>
+            ))}
+          </div>
+
           <label className="mt-4 block text-sm">
             <span className="text-muted-foreground">Mensagem do cliente</span>
             <textarea
@@ -126,6 +163,37 @@ function Feedbacks() {
               className="mt-1 w-full resize-y rounded-lg border bg-background p-3 text-sm"
             />
           </label>
+
+          {modo === "falar" && (
+            <div className="mt-3 space-y-2">
+              <button
+                type="button"
+                onClick={voz.alternar}
+                disabled={!voz.suportado}
+                aria-pressed={voz.gravando}
+                className={cn(
+                  "inline-flex min-h-11 items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium disabled:opacity-60",
+                  voz.gravando && "border-destructive text-destructive",
+                )}
+              >
+                {voz.gravando ? (
+                  <Square className="size-4 animate-pulse" aria-hidden />
+                ) : (
+                  <Mic className="size-4" aria-hidden />
+                )}
+                {voz.gravando ? "Parar ditado" : "Falar a mensagem"}
+              </button>
+              <p aria-live="polite" className="text-xs text-muted-foreground">
+                {!voz.suportado
+                  ? "Este navegador não suporta ditado por voz — use a opção Escrever."
+                  : voz.erro
+                    ? voz.erro
+                    : voz.gravando
+                      ? "Ouvindo... fale normalmente, o texto aparece acima."
+                      : "Fale em português e a transcrição entra no campo acima; você pode editar depois."}
+              </p>
+            </div>
+          )}
 
           <button
             type="button"
