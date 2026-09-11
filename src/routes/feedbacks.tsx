@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Quote, Save } from "lucide-react";
+import { Keyboard, Loader2, Mic, Quote, Save, Square } from "lucide-react";
 import { toast } from "sonner";
 
 import { MiaAvatar } from "@/components/mia-avatar";
 import { analisarFeedback, type FeedbackAnalysis } from "@/lib/feedback.functions";
 import { useStore } from "@/lib/store";
 import { fullDate, TODAY } from "@/lib/format";
+import { useSpeechInput } from "@/lib/use-speech-input";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/feedbacks")({
   head: () => ({
@@ -36,6 +38,10 @@ function Feedbacks() {
   const [autor, setAutor] = useState("");
   const [carregando, setCarregando] = useState(false);
   const [analise, setAnalise] = useState<FeedbackAnalysis | null>(null);
+  const [modo, setModo] = useState<"escrever" | "falar">("escrever");
+  const voz = useSpeechInput((trecho) =>
+    setTexto((atual) => (atual ? `${atual.trim()} ${trecho}` : trecho)),
+  );
 
   const projeto = store.projectById(projetoId);
 
