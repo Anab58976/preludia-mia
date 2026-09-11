@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmBreveRouteImport } from './routes/em-breve'
 import { Route as FeedbacksRouteImport } from './routes/feedbacks'
 import { Route as FinanceiroRouteImport } from './routes/financeiro'
@@ -20,6 +21,11 @@ import { Route as ClientesIdRouteImport } from './routes/clientes.$id'
 import { Route as ProjetosIndexRouteImport } from './routes/projetos.index'
 import { Route as ProjetosIdRouteImport } from './routes/projetos.$id'
 
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EmBreveRoute = EmBreveRouteImport.update({
   id: '/em-breve',
   path: '/em-breve',
@@ -72,6 +78,7 @@ const ProjetosIdRoute = ProjetosIdRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/em-breve': typeof EmBreveRoute
   '/feedbacks': typeof FeedbacksRoute
   '/financeiro': typeof FinanceiroRoute
@@ -84,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/projetos/': typeof ProjetosIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/em-breve': typeof EmBreveRoute
   '/feedbacks': typeof FeedbacksRoute
   '/financeiro': typeof FinanceiroRoute
@@ -97,6 +105,7 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/em-breve': typeof EmBreveRoute
   '/feedbacks': typeof FeedbacksRoute
   '/financeiro': typeof FinanceiroRoute
@@ -111,6 +120,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/em-breve'
     | '/feedbacks'
     | '/financeiro'
@@ -123,6 +133,7 @@ export interface FileRouteTypes {
     | '/projetos/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/em-breve'
     | '/feedbacks'
     | '/financeiro'
@@ -135,6 +146,7 @@ export interface FileRouteTypes {
     | '/projetos'
   id:
     | '__root__'
+    | '/'
     | '/em-breve'
     | '/feedbacks'
     | '/financeiro'
@@ -148,6 +160,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   EmBreveRoute: typeof EmBreveRoute
   FeedbacksRoute: typeof FeedbacksRoute
   FinanceiroRoute: typeof FinanceiroRoute
@@ -162,6 +175,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/em-breve': {
       id: '/em-breve'
       path: '/em-breve'
@@ -236,6 +256,7 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   EmBreveRoute: EmBreveRoute,
   FeedbacksRoute: FeedbacksRoute,
   FinanceiroRoute: FinanceiroRoute,
