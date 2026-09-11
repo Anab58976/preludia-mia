@@ -44,7 +44,6 @@ export type Feedback = {
   source: string;
   date: string;
   original: string;
-  audioUrl?: string;
   summary: string;
   changes: string[];
   urgency: "Baixa" | "Média" | "Alta";
