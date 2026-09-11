@@ -17,7 +17,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { ReadPageButton } from "@/components/read-page-button";
 
 const nav = [
-  { to: "/", label: "Painel", icon: LayoutDashboard },
+  { to: "/painel", label: "Painel", icon: LayoutDashboard },
   { to: "/projetos", label: "Projetos", icon: Music4 },
   { to: "/clientes", label: "Clientes", icon: Users },
   { to: "/feedbacks", label: "Feedbacks", icon: MessageSquareQuote },
@@ -45,7 +45,6 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Link
               key={to}
               to={to}
-              activeOptions={{ exact: to === "/" }}
               className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
               activeProps={{ className: "bg-ink text-ink-foreground hover:bg-ink hover:text-ink-foreground" }}
             >
@@ -69,7 +68,6 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link
                 key={to}
                 to={to}
-                activeOptions={{ exact: to === "/" }}
                 className="text-xs whitespace-nowrap text-muted-foreground"
                 activeProps={{ className: "text-foreground font-medium" }}
               >

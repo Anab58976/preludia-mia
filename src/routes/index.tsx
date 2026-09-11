@@ -1,200 +1,157 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpRight, CircleDollarSign, Clock3, TriangleAlert } from "lucide-react";
+import {
+  ArrowRight,
+  CircleDollarSign,
+  FileMusic,
+  ListChecks,
+  MessageSquareQuote,
+  Sparkles,
+} from "lucide-react";
 
 import { MiaAvatar } from "@/components/mia-avatar";
-import { StatusBadge } from "@/components/status-badge";
-import { useStore } from "@/lib/store";
-import { currency, daysUntil, deadlineLabel, shortDate } from "@/lib/format";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Painel — Prelúdia" },
+      { title: "Prelúdia — gestão para quem vive de música" },
       {
         name: "description",
         content:
-          "Visão geral dos seus projetos musicais, prazos, entregas e indicadores financeiros do mês.",
+          "Organize projetos musicais, prazos, clientes e finanças em um só lugar, com a assistente Mia analisando feedbacks e resumindo entregas.",
       },
-      { property: "og:title", content: "Painel — Prelúdia" },
+      { property: "og:title", content: "Prelúdia — gestão para quem vive de música" },
       {
         property: "og:description",
-        content: "Projetos, prazos e finanças do seu estúdio em uma só tela.",
+        content:
+          "Projetos, ficha musical, feedbacks e financeiro num só lugar, com a assistente Mia.",
       },
     ],
   }),
-  component: Painel,
+  component: Landing,
 });
 
-function Painel() {
-  const { projects, tasks, payments, clientById } = useStore();
+const recursos = [
+  {
+    icon: FileMusic,
+    title: "Ficha musical completa",
+    text: "Tonalidade, BPM, compasso, instrumentação e estrutura salvos em cada projeto.",
+  },
+  {
+    icon: MessageSquareQuote,
+    title: "Feedbacks traduzidos pela Mia",
+    text: "Cole a mensagem do cliente e receba um resumo objetivo das alterações pedidas.",
+  },
+  {
+    icon: ListChecks,
+    title: "Tarefas e entregas",
+    text: "Prazos, arquivos por categoria e um resumo pronto para enviar ao cliente.",
+  },
+  {
+    icon: CircleDollarSign,
+    title: "Financeiro claro",
+    text: "Faturamento do mês, valores a receber e status de pagamento por projeto.",
+  },
+];
 
-  const emProducao = projects.filter((p) => p.status === "Em produção").length;
-  const emRevisao = projects.filter((p) => p.status === "Em revisão").length;
-  const concluidos = projects.filter((p) => p.status === "Concluído").length;
-  const atrasados = projects.filter(
-    (p) => p.status !== "Concluído" && daysUntil(p.deadline) < 0,
-  ).length;
-
-  const faturadoMes = payments
-    .filter((p) => p.status === "Pago" && p.date.startsWith("2026-09"))
-    .reduce((sum, p) => sum + p.amount, 0);
-  const aReceber = payments
-    .filter((p) => p.status !== "Pago")
-    .reduce((sum, p) => sum + p.amount, 0);
-  const ativos = projects.filter((p) => p.status !== "Concluído" && p.status !== "Orçamento").length;
-
-  const proximos = [...projects]
-    .filter((p) => p.status !== "Concluído")
-    .sort((a, b) => a.deadline.localeCompare(b.deadline))
-    .slice(0, 5);
-
-  const tarefasUrgentes = tasks
-    .filter((t) => !t.done)
-    .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
-    .slice(0, 4);
-
+function Landing() {
   return (
-    <div className="space-y-8">
-      <header>
-        <p className="text-sm text-muted-foreground">Bom dia, Julia</p>
-        <h1 className="mt-1 text-3xl font-semibold">Painel do estúdio</h1>
+    <div className="min-h-screen bg-background">
+      <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-6 lg:px-8">
+        <div className="flex items-center gap-3">
+          <MiaAvatar size={30} />
+          <p className="font-display text-lg font-semibold">Prelúdia</p>
+        </div>
+        <Link
+          to="/comecar"
+          className="rounded-full border px-4 py-2 text-sm font-medium transition-colors hover:bg-secondary"
+        >
+          Entrar
+        </Link>
       </header>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {[
-          { label: "Em produção", value: emProducao, hint: "projetos ativos na bancada" },
-          { label: "Em revisão", value: emRevisao, hint: "aguardando ajustes finais" },
-          { label: "Concluídos", value: concluidos, hint: "entregues neste ano" },
-          { label: "Atrasados", value: atrasados, hint: "precisam de atenção", alerta: true },
-        ].map((card) => (
-          <div key={card.label} className="rounded-xl border bg-card p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">{card.label}</p>
-              {card.alerta && card.value > 0 && (
-                <TriangleAlert className="size-4 text-destructive" />
-              )}
-            </div>
-            <p className="mt-2 text-3xl font-semibold">{card.value}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{card.hint}</p>
-          </div>
-        ))}
-      </section>
-
-      <section className="grid gap-6 lg:grid-cols-3">
-        <div className="rounded-xl border bg-card lg:col-span-2">
-          <div className="flex items-center justify-between border-b px-5 py-4">
-            <h2 className="text-base font-semibold">Próximos prazos</h2>
-            <Link to="/projetos" className="text-sm text-primary hover:underline">
-              Ver todos
-            </Link>
-          </div>
-          <ul className="divide-y">
-            {proximos.map((project) => {
-              const atrasado = daysUntil(project.deadline) < 0;
-              return (
-                <li key={project.id}>
-                  <Link
-                    to="/projetos/$id"
-                    params={{ id: project.id }}
-                    className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-secondary/60"
-                  >
-                    <div className="w-14 shrink-0 rounded-lg bg-secondary px-2 py-2 text-center">
-                      <p className="text-sm font-semibold">{shortDate(project.deadline)}</p>
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">{project.title}</p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {clientById(project.clientId)?.name}
-                      </p>
-                    </div>
-                    <span
-                      className={
-                        atrasado
-                          ? "text-xs font-medium text-destructive"
-                          : "text-xs text-muted-foreground"
-                      }
-                    >
-                      {deadlineLabel(project.deadline)}
-                    </span>
-                    <StatusBadge status={project.status} className="hidden sm:inline-flex" />
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-
-        <div className="space-y-6">
-          <div className="rounded-xl border bg-ink p-5 text-ink-foreground">
-            <div className="flex items-center gap-2 text-sm text-ink-muted">
-              <CircleDollarSign className="size-4" />
-              Faturamento de setembro
-            </div>
-            <p className="mt-2 text-3xl font-semibold">{currency(faturadoMes)}</p>
-            <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-              <div className="rounded-lg bg-white/5 p-3">
-                <p className="text-xs text-ink-muted">A receber</p>
-                <p className="mt-1 font-medium">{currency(aReceber)}</p>
-              </div>
-              <div className="rounded-lg bg-white/5 p-3">
-                <p className="text-xs text-ink-muted">Projetos ativos</p>
-                <p className="mt-1 font-medium">{ativos}</p>
-              </div>
-            </div>
+      <main>
+        <section className="mx-auto max-w-6xl px-5 pt-10 pb-16 lg:px-8 lg:pt-16">
+          <p className="inline-flex items-center gap-2 rounded-full bg-blue-soft/70 px-3 py-1 text-xs font-medium">
+            <Sparkles className="size-3.5" aria-hidden />
+            Com a assistente Mia
+          </p>
+          <h1 className="mt-5 max-w-3xl font-display text-4xl leading-tight font-semibold sm:text-5xl">
+            O estúdio inteiro organizado: projetos, prazos, clientes e dinheiro.
+          </h1>
+          <p className="mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg">
+            Feito para compositores, maestros, produtores e arranjadores — e também para quem
+            encomenda uma obra e quer acompanhar cada etapa com clareza.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link
-              to="/financeiro"
-              className="mt-4 inline-flex items-center gap-1 text-sm text-ink-muted hover:text-ink-foreground"
+              to="/comecar"
+              className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-medium text-ink-foreground transition-opacity hover:opacity-90"
             >
-              Ver financeiro <ArrowUpRight className="size-3.5" />
+              Começar agora
+              <ArrowRight className="size-4" aria-hidden />
+            </Link>
+            <Link
+              to="/painel"
+              className="inline-flex items-center gap-2 rounded-full border px-6 py-3 text-sm font-medium transition-colors hover:bg-secondary"
+            >
+              Ver uma demonstração
             </Link>
           </div>
+          <div className="staff-lines mt-12 h-10 opacity-60" aria-hidden />
+        </section>
 
-          <div className="rounded-xl border bg-blue-soft/50 p-5">
-            <div className="flex items-start gap-3">
-              <MiaAvatar size={40} />
-              <div>
-                <p className="text-sm font-semibold">Mia sugere</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  A trilha da Claraluz vence em 3 dias e tem um feedback sem resposta. Quer que eu
-                  prepare o resumo da entrega?
-                </p>
-              </div>
-            </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Link
-                to="/feedbacks"
-                className="rounded-lg bg-ink px-3 py-2 text-xs font-medium text-ink-foreground"
-              >
-                Analisar feedback
-              </Link>
-              <Link
-                to="/tarefas"
-                className="rounded-lg border bg-card px-3 py-2 text-xs font-medium"
-              >
-                Preparar entrega
-              </Link>
-            </div>
+        <section className="mx-auto max-w-6xl px-5 pb-16 lg:px-8">
+          <h2 className="text-2xl font-semibold">Tudo que um projeto musical exige</h2>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {recursos.map(({ icon: Icon, title, text }) => (
+              <article key={title} className="rounded-2xl border bg-card p-5">
+                <Icon className="size-5 text-primary" aria-hidden />
+                <h3 className="mt-3 text-sm font-semibold">{title}</h3>
+                <p className="mt-1.5 text-sm text-muted-foreground">{text}</p>
+              </article>
+            ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="rounded-xl border bg-card">
-        <div className="flex items-center justify-between border-b px-5 py-4">
-          <h2 className="text-base font-semibold">Tarefas mais urgentes</h2>
-          <Link to="/tarefas" className="text-sm text-primary hover:underline">
-            Ver tudo
-          </Link>
-        </div>
-        <ul className="divide-y">
-          {tarefasUrgentes.map((task) => (
-            <li key={task.id} className="flex items-center gap-3 px-5 py-3 text-sm">
-              <Clock3 className="size-4 text-muted-foreground" />
-              <span className="flex-1">{task.title}</span>
-              <span className="text-xs text-muted-foreground">{deadlineLabel(task.dueDate)}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
+        <section className="mx-auto max-w-6xl px-5 pb-20 lg:px-8">
+          <div className="grid gap-4 md:grid-cols-2">
+            <article className="rounded-2xl border bg-card p-6">
+              <h2 className="text-lg font-semibold">Para quem produz</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Controle a fila de arranjos, o andamento de cada obra, os arquivos entregues e o que
+                ainda falta receber.
+              </p>
+              <Link
+                to="/comecar"
+                search={{ perfil: "produtor" }}
+                className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary"
+              >
+                Criar conta de profissional
+                <ArrowRight className="size-4" aria-hidden />
+              </Link>
+            </article>
+            <article className="rounded-2xl border bg-blue-soft/50 p-6">
+              <h2 className="text-lg font-semibold">Para quem encomenda</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Acompanhe o andamento da sua obra, envie observações e receba as entregas
+                organizadas, sem correr atrás por mensagem.
+              </p>
+              <Link
+                to="/comecar"
+                search={{ perfil: "cliente" }}
+                className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary"
+              >
+                Criar conta de cliente
+                <ArrowRight className="size-4" aria-hidden />
+              </Link>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer className="border-t px-5 py-8 text-center text-xs text-muted-foreground lg:px-8">
+        Prelúdia — gestão para profissionais da música e do audiovisual.
+      </footer>
     </div>
   );
 }
