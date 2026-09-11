@@ -6,7 +6,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { useStore } from "@/lib/store";
 import { currency, daysUntil, deadlineLabel, shortDate } from "@/lib/format";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/painel")({
   head: () => ({
     meta: [
       { title: "Painel — Prelúdia" },
