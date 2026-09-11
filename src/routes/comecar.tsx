@@ -8,7 +8,7 @@ type Perfil = "produtor" | "cliente";
 
 export const Route = createFileRoute("/comecar")({
   validateSearch: (search: Record<string, unknown>): { perfil?: Perfil } => {
-    const perfil = search.perfil;
+    const perfil = search["perfil"];
     return perfil === "produtor" || perfil === "cliente" ? { perfil } : {};
   },
   head: () => ({
