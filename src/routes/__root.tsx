@@ -4,7 +4,6 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
-  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -126,25 +125,17 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
-const rotasPublicas = ["/", "/comecar"];
-
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const publica = rotasPublicas.includes(pathname.replace(/\/$/, "") || "/");
 
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <StoreProvider>
-          {publica ? (
-            /* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */
+          <AppShell>
+            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
             <Outlet />
-          ) : (
-            <AppShell>
-              <Outlet />
-            </AppShell>
-          )}
+          </AppShell>
           <Toaster position="top-right" />
         </StoreProvider>
       </ThemeProvider>
