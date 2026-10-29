@@ -40,7 +40,7 @@ export const analisarFeedback = createServerFn({ method: "POST" })
     const ai = usingLovable
       ? createOpenAI({
           baseURL: "https://ai.gateway.lovable.dev/v1",
-          apiKey: lovableKey,
+          apiKey: lovableKey!,
           headers: {
             "Lovable-API-Key": lovableKey!,
             "X-Lovable-AIG-SDK": "vercel-ai-sdk",
