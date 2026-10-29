@@ -259,7 +259,7 @@ export function MiaChat() {
       else if (pending.kind === "task") store.addTask({ projectId: pending.targetId, title: pending.title, dueDate: pending.deadline, priority: pending.priority ?? "Média" });
       else {
         const { entidade, operacao, campos: c, alvo, projeto } = pending as Extract<Pending, { kind: "generic" }>;
-        const str = (key: string) => typeof c[key] === "string" ? String(c[key]).trim() : undefined;
+        const str = (key: string) => typeof c[key] === "string" && String(c[key]).trim() ? String(c[key]).trim() : undefined;
         const num = (key: string) => typeof c[key] === "number" && Number.isFinite(c[key]) ? Number(c[key]) : undefined;
         const projectRef = (name: string) => find(store.projects, name, x => x.title);
         const clientRef = (name: string) => find(store.clients, name, x => x.name);
