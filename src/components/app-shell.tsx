@@ -15,6 +15,7 @@ import { MiaChat } from "@/components/mia-chat";
 import { MiaAvatar } from "@/components/mia-avatar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ReadPageButton } from "@/components/read-page-button";
+import { WorkspaceTools } from "@/components/workspace-tools";
 
 const nav = [
   { to: "/", label: "Painel", icon: LayoutDashboard },
@@ -54,11 +55,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
           ))}
         </nav>
-        <div className="m-3 rounded-xl border bg-blue-soft/60 p-4">
+        <div className="m-3 space-y-3 rounded-xl border bg-blue-soft/60 p-4">
           <p className="text-xs font-medium">Plano Maestro</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Projetos ilimitados e análises da Mia sem limite mensal.
+            Ferramentas musicais e gestão em um só lugar.
           </p>
+          <WorkspaceTools />
         </div>
       </aside>
 
@@ -79,17 +81,18 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
           <div className="hidden items-center gap-2 text-sm text-muted-foreground lg:flex">
             <CalendarClock className="size-4" />
-            Quarta-feira, 9 de setembro de 2026
+            {new Intl.DateTimeFormat("pt-BR", { dateStyle: "full" }).format(new Date())}
           </div>
           <div className="flex items-center gap-3">
+            <div className="lg:hidden"><WorkspaceTools /></div>
             <ReadPageButton />
             <ThemeToggle />
             <div className="hidden text-right sm:block">
-              <p className="text-sm leading-tight font-medium">Julia Alcassa</p>
-              <p className="text-xs text-muted-foreground">Compositora e arranjadora</p>
+              <p className="text-sm leading-tight font-medium">Estúdio Prelúdia</p>
+              <p className="text-xs text-muted-foreground">Espaço de trabalho local</p>
             </div>
             <div className="flex size-9 items-center justify-center rounded-full bg-ink text-sm font-medium text-ink-foreground">
-              JA
+              P
             </div>
           </div>
         </header>

@@ -35,8 +35,10 @@ function Painel() {
     (p) => p.status !== "Concluído" && daysUntil(p.deadline) < 0,
   ).length;
 
+  const month = new Date().toLocaleDateString("en-CA").slice(0, 7);
+  const monthName = new Intl.DateTimeFormat("pt-BR", { month: "long" }).format(new Date());
   const faturadoMes = payments
-    .filter((p) => p.status === "Pago" && p.date.startsWith("2026-09"))
+    .filter((p) => p.status === "Pago" && p.date.startsWith(month))
     .reduce((sum, p) => sum + p.amount, 0);
   const aReceber = payments
     .filter((p) => p.status !== "Pago")
@@ -48,6 +50,7 @@ function Painel() {
     .sort((a, b) => a.deadline.localeCompare(b.deadline))
     .slice(0, 5);
 
+  const nextDeadline = [...projects].filter(p => p.status !== "Concluído").sort((a,b) => a.deadline.localeCompare(b.deadline))[0];
   const tarefasUrgentes = tasks
     .filter((t) => !t.done)
     .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
@@ -56,7 +59,7 @@ function Painel() {
   return (
     <div className="space-y-8">
       <header>
-        <p className="text-sm text-muted-foreground">Bom dia, Julia</p>
+        <p className="text-sm text-muted-foreground">Seu espaço de criação</p>
         <h1 className="mt-1 text-3xl font-semibold">Painel do estúdio</h1>
       </header>
 
@@ -64,7 +67,7 @@ function Painel() {
         {[
           { label: "Em produção", value: emProducao, hint: "projetos ativos na bancada" },
           { label: "Em revisão", value: emRevisao, hint: "aguardando ajustes finais" },
-          { label: "Concluídos", value: concluidos, hint: "entregues neste ano" },
+          { label: "Concluídos", value: concluidos, hint: "finalizados no histórico" },
           { label: "Atrasados", value: atrasados, hint: "precisam de atenção", alerta: true },
         ].map((card) => (
           <div key={card.label} className="rounded-xl border bg-card p-5">
@@ -89,6 +92,7 @@ function Painel() {
             </Link>
           </div>
           <ul className="divide-y">
+            {proximos.length === 0 && <li className="px-5 py-5 text-sm text-muted-foreground">Sem prazos pendentes.</li>}
             {proximos.map((project) => {
               const atrasado = daysUntil(project.deadline) < 0;
               return (
@@ -128,7 +132,7 @@ function Painel() {
           <div className="rounded-xl border bg-ink p-5 text-ink-foreground">
             <div className="flex items-center gap-2 text-sm text-ink-muted">
               <CircleDollarSign className="size-4" />
-              Faturamento de setembro
+              Faturamento de {monthName}
             </div>
             <p className="mt-2 text-3xl font-semibold">{currency(faturadoMes)}</p>
             <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
@@ -155,8 +159,7 @@ function Painel() {
               <div>
                 <p className="text-sm font-semibold">Mia sugere</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  A trilha da Claraluz vence em 3 dias e tem um feedback sem resposta. Quer que eu
-                  prepare o resumo da entrega?
+                  {nextDeadline ? `${nextDeadline.title} ${deadlineLabel(nextDeadline.deadline).toLowerCase()}. Revise as tarefas e prepare a entrega com antecedência.` : "Nenhum prazo pendente. Cadastre um projeto para a Mia acompanhar."}
                 </p>
               </div>
             </div>

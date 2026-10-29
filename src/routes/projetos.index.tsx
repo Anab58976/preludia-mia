@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Plus, Search } from "lucide-react";
+import { ProjectEditor } from "@/components/project-editor";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { StatusBadge } from "@/components/status-badge";
@@ -29,8 +31,10 @@ export const Route = createFileRoute("/projetos/")({
 function Projetos() {
   const { projects, clientById } = useStore();
   const [filtro, setFiltro] = useState<string>("Todos");
+  const [busca, setBusca] = useState("");
+  const [editor, setEditor] = useState(false);
 
-  const lista = projects.filter((p) => filtro === "Todos" || p.status === filtro);
+  const lista = projects.filter((p) => (filtro === "Todos" || p.status === filtro) && `${p.title} ${clientById(p.clientId)?.name ?? ""}`.toLowerCase().includes(busca.toLowerCase()));
 
   return (
     <div className="space-y-6">
@@ -41,7 +45,10 @@ function Projetos() {
             {projects.length} trabalhos cadastrados no seu estúdio.
           </p>
         </div>
+        <button type="button" onClick={() => setEditor(true)} className="inline-flex items-center gap-2 rounded-lg bg-ink px-4 py-2 text-sm font-medium text-ink-foreground"><Plus className="size-4"/> Novo projeto</button>
       </header>
+      <ProjectEditor open={editor} onOpenChange={setEditor} />
+      <label className="flex max-w-lg items-center gap-2 rounded-lg border bg-card px-3 py-2"><Search className="size-4 text-muted-foreground"/><input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar projeto ou cliente" className="min-w-0 flex-1 bg-transparent text-sm outline-none" aria-label="Buscar projeto" /></label>
 
       <div className="flex flex-wrap gap-2">
         {["Todos", ...PROJECT_STATUSES].map((status) => (
@@ -61,6 +68,7 @@ function Projetos() {
         ))}
       </div>
 
+      {lista.length === 0 && <p className="rounded-xl border bg-card p-6 text-sm text-muted-foreground">Nenhum projeto encontrado. Crie um projeto para começar.</p>}
       <div className="grid gap-4 xl:grid-cols-2">
         {lista.map((project) => {
           const saldo = project.budget - project.paid;

@@ -1,4 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { ClientEditor } from "@/components/client-editor";
+import { Plus, Search } from "lucide-react";
 import { Mail, Phone } from "lucide-react";
 
 import { useStore } from "@/lib/store";
@@ -25,18 +28,23 @@ export const Route = createFileRoute("/clientes/")({
 
 function Clientes() {
   const { clients, projects } = useStore();
+  const [editor, setEditor] = useState(false);
+  const [busca, setBusca] = useState("");
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-3xl font-semibold">Clientes</h1>
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div><h1 className="text-3xl font-semibold">Clientes</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {clients.length} clientes ativos no seu caderno.
-        </p>
+        </p></div>
+        <button type="button" onClick={() => setEditor(true)} className="inline-flex items-center gap-2 rounded-lg bg-ink px-4 py-2 text-sm font-medium text-ink-foreground"><Plus className="size-4"/> Novo cliente</button>
       </header>
+      <ClientEditor open={editor} onOpenChange={setEditor} />
+      <label className="flex max-w-lg items-center gap-2 rounded-lg border bg-card px-3 py-2"><Search className="size-4 text-muted-foreground"/><input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar clientes" className="min-w-0 flex-1 bg-transparent text-sm outline-none" aria-label="Buscar clientes" /></label>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        {clients.map((client) => {
+        {clients.filter(c => `${c.name} ${c.contact} ${c.city}`.toLowerCase().includes(busca.toLowerCase())).map((client) => {
           const doCliente = projects.filter((p) => p.clientId === client.id);
           const faturado = doCliente.reduce((sum, p) => sum + p.paid, 0);
           return (

@@ -1,4 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useMemo, useState, type FormEvent } from "react";
+import { toast } from "sonner";
+import { Plus, Pencil, Trash2, Download } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { TODAY } from "@/lib/format";
+import type { Payment } from "@/data/preludia";
 import {
   Bar,
   BarChart,
@@ -13,7 +19,7 @@ import {
   YAxis,
 } from "recharts";
 
-import { monthlyRevenue } from "@/data/preludia";
+
 import { useStore } from "@/lib/store";
 import { currency, fullDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -44,7 +50,31 @@ const statusStyles: Record<string, string> = {
 };
 
 function Financeiro() {
-  const { payments, projects, projectById } = useStore();
+  const store = useStore();
+  const { payments, projects, projectById } = store;
+  const [editor, setEditor] = useState(false);
+  const [editing, setEditing] = useState<Payment | undefined>(undefined);
+  const [projectId, setProjectId] = useState(projects[0]?.id ?? "");
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("0");
+  const [date, setDate] = useState(TODAY);
+  const [paymentStatus, setPaymentStatus] = useState<Payment["status"]>("A receber");
+  const openEditor = (payment?: Payment) => {
+    setEditing(payment); setProjectId(payment?.projectId ?? projects[0]?.id ?? ""); setDescription(payment?.description ?? "");
+    setAmount(String(payment?.amount ?? 0)); setDate(payment?.date ?? TODAY); setPaymentStatus(payment?.status ?? "A receber"); setEditor(true);
+  };
+  const save = (event: FormEvent) => { event.preventDefault();
+    if (!projectId || !description.trim() || Number(amount) <= 0) { toast.error("Preencha lançamento, projeto e valor válido."); return; }
+    const fields = { projectId, description: description.trim(), amount: Number(amount), date, status: paymentStatus };
+    if (editing) store.updatePayment(editing.id, fields); else store.addPayment(fields);
+    setEditor(false); toast.success("Lançamento salvo.");
+  };
+  const monthlyRevenue = useMemo(() => {
+    const groups = new Map<string, { month: string; faturado: number; aReceber: number }>();
+    for (const payment of payments) { const key = payment.date.slice(0,7); const row = groups.get(key) ?? { month: key, faturado: 0, aReceber: 0 };
+      if (payment.status === "Pago") row.faturado += payment.amount; else row.aReceber += payment.amount; groups.set(key, row); }
+    return [...groups.values()].sort((a,b) => a.month.localeCompare(b.month)).slice(-9).map(row => ({...row, month: new Intl.DateTimeFormat("pt-BR", { month: "short", year: "2-digit", timeZone: "UTC" }).format(new Date(`${row.month}-01T12:00:00Z`))}));
+  }, [payments]);
 
   const recebido = payments.filter((p) => p.status === "Pago").reduce((s, p) => s + p.amount, 0);
   const aReceber = payments.filter((p) => p.status === "A receber").reduce((s, p) => s + p.amount, 0);
@@ -68,12 +98,14 @@ function Financeiro() {
 
   return (
     <div className="space-y-8">
-      <header>
-        <h1 className="text-3xl font-semibold">Financeiro</h1>
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div><h1 className="text-3xl font-semibold">Financeiro</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Receitas e pendências ligadas aos seus projetos.
-        </p>
+        </p></div>
+        <div className="flex flex-wrap gap-2"><button type="button" onClick={() => { const csv = ["Projeto,Descrição,Valor,Data,Status", ...payments.map(p => [projectById(p.projectId)?.title ?? "", p.description, String(p.amount), p.date, p.status].map(v => `"${v.replaceAll(String.fromCharCode(34), String.fromCharCode(34,34))}"`).join(","))].join("\n"); const blob = new Blob(["\uFEFF" + csv], {type:"text/csv;charset=utf-8"}); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href=url; a.download="preludia-financeiro.csv"; a.click(); URL.revokeObjectURL(url); }} className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm"><Download className="size-4"/> Exportar CSV</button><button type="button" onClick={() => openEditor()} className="inline-flex items-center gap-2 rounded-lg bg-ink px-4 py-2 text-sm text-ink-foreground"><Plus className="size-4"/> Lançamento</button></div>
       </header>
+      <Dialog open={editor} onOpenChange={setEditor}><DialogContent><DialogHeader><DialogTitle>{editing ? "Editar lançamento" : "Novo lançamento"}</DialogTitle></DialogHeader><form onSubmit={save} className="space-y-3"><label className="block text-sm">Projeto<select required value={projectId} onChange={e => setProjectId(e.target.value)} className="mt-1 w-full rounded-lg border bg-background p-2">{projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}</select></label><label className="block text-sm">Descrição<input required value={description} onChange={e => setDescription(e.target.value)} className="mt-1 w-full rounded-lg border bg-background p-2"/></label><div className="grid grid-cols-2 gap-3"><label className="text-sm">Valor (R$)<input required type="number" step="0.01" min="0.01" value={amount} onChange={e => setAmount(e.target.value)} className="mt-1 w-full rounded-lg border bg-background p-2"/></label><label className="text-sm">Data<input required type="date" value={date} onChange={e => setDate(e.target.value)} className="mt-1 w-full rounded-lg border bg-background p-2"/></label></div><label className="block text-sm">Situação<select value={paymentStatus} onChange={e => setPaymentStatus(e.target.value as Payment["status"])} className="mt-1 w-full rounded-lg border bg-background p-2"><option>Pago</option><option>A receber</option><option>Atrasado</option></select></label><button type="submit" className="w-full rounded-lg bg-ink px-4 py-2 text-sm text-ink-foreground">Salvar lançamento</button></form></DialogContent></Dialog>
 
       <section className="grid gap-4 sm:grid-cols-3">
         {[
@@ -159,6 +191,7 @@ function Financeiro() {
                 >
                   {payment.status}
                 </span>
+                <button type="button" aria-label={`Editar ${payment.description}`} onClick={() => openEditor(payment)} className="rounded-lg border p-2"><Pencil className="size-3.5"/></button><button type="button" aria-label={`Excluir ${payment.description}`} onClick={() => { if (window.confirm("Excluir lançamento financeiro?")) store.deletePayment(payment.id); }} className="rounded-lg border p-2 text-destructive"><Trash2 className="size-3.5"/></button>
               </li>
             ))}
         </ul>

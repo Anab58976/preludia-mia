@@ -38,6 +38,7 @@ function Feedbacks() {
   const [autor, setAutor] = useState("");
   const [carregando, setCarregando] = useState(false);
   const [analise, setAnalise] = useState<FeedbackAnalysis | null>(null);
+  const [criarTarefas, setCriarTarefas] = useState(false);
   const [modo, setModo] = useState<"escrever" | "falar">("escrever");
   const voz = useSpeechInput((trecho) =>
     setTexto((atual) => (atual ? `${atual.trim()} ${trecho}` : trecho)),
@@ -79,9 +80,10 @@ function Feedbacks() {
       urgency: analise.urgencia,
       tone: analise.tom,
     });
-    toast.success("Feedback salvo no projeto.");
+    if (criarTarefas) for (const change of analise.alteracoes) { store.addTask({ projectId: projeto.id, title: change, priority: analise.urgencia, dueDate: projeto.deadline }); }
+    toast.success(criarTarefas ? "Feedback salvo e tarefas criadas." : "Feedback salvo no projeto.");
     setTexto("");
-    setAnalise(null);
+    setAnalise(null); setCriarTarefas(false);
   };
 
   return (
@@ -265,6 +267,7 @@ function Feedbacks() {
                 </div>
               )}
 
+              <label className="flex cursor-pointer items-center gap-2 text-sm"><input type="checkbox" checked={criarTarefas} onChange={e => setCriarTarefas(e.target.checked)} className="size-4"/> Criar tarefas para as alterações analisadas</label>
               <button
                 type="button"
                 onClick={salvar}
