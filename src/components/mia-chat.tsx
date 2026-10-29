@@ -344,7 +344,7 @@ export function MiaChat() {
                     {message.parts.map((part, index) => {
                       if (part.type === "text") {
                         return <MessageResponse key={index}>
-                          {message.role === "user" ? part.text.split(MARCADOR_CONTEUDO)[0] : part.text}
+                          {message.role === "user" ? (part.text.split(MARCADOR_CONTEUDO)[0] ?? "") : part.text}
                         </MessageResponse>;
                       }
                       if (part.type === "file") {
