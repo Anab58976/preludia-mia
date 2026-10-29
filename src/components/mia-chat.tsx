@@ -27,7 +27,7 @@ import { useStore } from "@/lib/store";
 import { useSpeechInput } from "@/lib/use-speech-input";
 import { currency, TODAY } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { PROJECT_STATUSES, type Priority } from "@/data/preludia";
+import { PROJECT_STATUSES, type Priority, type Client, type Project, type Task, type Payment } from "@/data/preludia";
 
 const SUGESTOES = [
   "Quais entregas vencem nesta semana?",
@@ -203,7 +203,7 @@ export function MiaChat() {
           const name = String(inputData["cliente"] ?? "").trim().toLowerCase();
           const matches = name.length >= 2 ? store.clients.filter(c => c.name.toLowerCase() === name || c.name.toLowerCase().includes(name)) : [];
           if (matches.length !== 1) { toast.error("A Mia não identificou um único cliente. Informe o nome exato antes de criar."); continue; }
-          setQueue(prev => [...prev, { kind: "project", title: String(inputData["titulo"] ?? "Novo projeto"), targetId: matches[0].id, type: String(inputData["tipo"] ?? "Projeto musical"), deadline: String(inputData["prazo"] ?? TODAY), budget: Number(inputData["valor"] ?? 0) }]);
+          setQueue(prev => [...prev, { kind: "project", title: String(inputData["titulo"] ?? "Novo projeto"), targetId: matches[0]!.id, type: String(inputData["tipo"] ?? "Projeto musical"), deadline: String(inputData["prazo"] ?? TODAY), budget: Number(inputData["valor"] ?? 0) }]);
         }
         if (type === "tool-gerenciar_registro") {
           applied.current.add(toolCallId);
@@ -219,7 +219,7 @@ export function MiaChat() {
           const name = String(inputData["projeto"] ?? "").trim().toLowerCase();
           const matches = name.length >= 2 ? store.projects.filter(p => p.id.toLowerCase() === name || p.title.toLowerCase() === name || p.title.toLowerCase().includes(name)) : [];
           if (matches.length !== 1) { toast.error("A Mia não identificou um único projeto. Informe o nome exato."); continue; }
-          setQueue(prev => [...prev, { kind: "task", title: String(inputData["titulo"] ?? "Nova tarefa"), targetId: matches[0].id, deadline: String(inputData["prazo"] ?? TODAY), priority: ["Alta", "Média", "Baixa"].includes(String(inputData["prioridade"])) ? inputData["prioridade"] as Priority : "Média" }]);
+          setQueue(prev => [...prev, { kind: "task", title: String(inputData["titulo"] ?? "Nova tarefa"), targetId: matches[0]!.id, deadline: String(inputData["prazo"] ?? TODAY), priority: ["Alta", "Média", "Baixa"].includes(String(inputData["prioridade"])) ? inputData["prioridade"] as Priority : "Média" }]);
         }
       }
     }
@@ -252,26 +252,26 @@ export function MiaChat() {
       const term = label.trim().toLowerCase();
       const matched = items.filter(x => x.id.toLowerCase() === term || getName(x).toLowerCase() === term);
       if (matched.length !== 1) throw new Error(`Não encontrei um único registro para “${label}”. Informe o nome exato ou ID.`);
-      return matched[0];
+      return matched[0]!;
     };
     try {
       if (pending.kind === "project") store.addProject({ title: pending.title, clientId: pending.targetId, type: pending.type ?? "Projeto musical", deadline: pending.deadline, budget: Math.max(0, pending.budget ?? 0) });
       else if (pending.kind === "task") store.addTask({ projectId: pending.targetId, title: pending.title, dueDate: pending.deadline, priority: pending.priority ?? "Média" });
       else {
-        const { entidade, operacao, campos: c, alvo, projeto } = pending;
+        const { entidade, operacao, campos: c, alvo, projeto } = pending as Extract<Pending, { kind: "generic" }>;
         const str = (key: string) => typeof c[key] === "string" ? String(c[key]).trim() : undefined;
         const num = (key: string) => typeof c[key] === "number" && Number.isFinite(c[key]) ? Number(c[key]) : undefined;
         const projectRef = (name: string) => find(store.projects, name, x => x.title);
         const clientRef = (name: string) => find(store.clients, name, x => x.name);
         if (entidade === "cliente") {
           if (operacao === "criar") { if (!str("nome")) throw Error("Informe o nome do cliente."); store.addClient({ name: str("nome")!, contact: str("contato") ?? "", email: str("email") ?? "", phone: str("telefone") ?? "", city: str("cidade") ?? "" }); }
-          else { const x = clientRef(alvo ?? ""); if (operacao === "excluir") { if (!store.deleteClient(x.id)) throw Error("Cliente vinculado a projeto não pode ser excluído."); } else store.updateClient(x.id, { ...(str("nome") !== undefined && { name: str("nome") }), ...(str("contato") !== undefined && { contact: str("contato") }), ...(str("email") !== undefined && { email: str("email") }), ...(str("telefone") !== undefined && { phone: str("telefone") }), ...(str("cidade") !== undefined && { city: str("cidade") }) }); }
+          else { const x = clientRef(alvo ?? ""); if (operacao === "excluir") { if (!store.deleteClient(x.id)) throw Error("Cliente vinculado a projeto não pode ser excluído."); } else store.updateClient(x.id, { ...(str("nome") !== undefined && { name: str("nome") }), ...(str("contato") !== undefined && { contact: str("contato") }), ...(str("email") !== undefined && { email: str("email") }), ...(str("telefone") !== undefined && { phone: str("telefone") }), ...(str("cidade") !== undefined && { city: str("cidade") }) } as Partial<Client>); }
         } else if (entidade === "projeto") {
           if (operacao === "criar") { if (!str("titulo") || !str("cliente")) throw Error("Informe título e cliente cadastrado."); store.addProject({ title: str("titulo")!, clientId: clientRef(str("cliente")!).id, type: str("tipo") ?? "Projeto musical", deadline: str("prazo") ?? TODAY, budget: num("valor") ?? 0 }); }
-          else { const x = projectRef(alvo ?? ""); if (operacao === "excluir") store.deleteProject(x.id); else { const status = str("status"); if (status && !PROJECT_STATUSES.includes(status as typeof PROJECT_STATUSES[number])) throw Error("Status do projeto inválido."); store.updateProject(x.id, { ...(str("titulo") !== undefined && { title: str("titulo") }), ...(str("tipo") !== undefined && { type: str("tipo") }), ...(str("cliente") !== undefined && { clientId: clientRef(str("cliente")!).id }), ...(str("prazo") !== undefined && { deadline: str("prazo") }), ...(num("valor") !== undefined && { budget: Math.max(0, num("valor")!) }), ...(num("progresso") !== undefined && { progress: Math.max(0, Math.min(100, num("progresso")!)) }), ...(status && { status: status as typeof PROJECT_STATUSES[number] }) }); } }
+          else { const x = projectRef(alvo ?? ""); if (operacao === "excluir") store.deleteProject(x.id); else { const status = str("status"); if (status && !PROJECT_STATUSES.includes(status as typeof PROJECT_STATUSES[number])) throw Error("Status do projeto inválido."); store.updateProject(x.id, { ...(str("titulo") !== undefined && { title: str("titulo") }), ...(str("tipo") !== undefined && { type: str("tipo") }), ...(str("cliente") !== undefined && { clientId: clientRef(str("cliente")!).id }), ...(str("prazo") !== undefined && { deadline: str("prazo") }), ...(num("valor") !== undefined && { budget: Math.max(0, num("valor")!) }), ...(num("progresso") !== undefined && { progress: Math.max(0, Math.min(100, num("progresso")!)) }), ...(status && { status: status as typeof PROJECT_STATUSES[number] }) } as Partial<Project>); } }
         } else if (entidade === "tarefa") {
           if (operacao === "criar") { if (!str("titulo") || !projeto) throw Error("Informe a tarefa e o projeto."); store.addTask({ title: str("titulo")!, projectId: projectRef(projeto).id, dueDate: str("prazo") ?? TODAY, priority: (str("prioridade") as Priority) ?? "Média" }); }
-          else { const x = find(store.tasks, alvo ?? "", v => v.title); if (operacao === "excluir") store.deleteTask(x.id); else store.updateTask(x.id, { ...(str("titulo") !== undefined && { title: str("titulo") }), ...(str("prazo") !== undefined && { dueDate: str("prazo") }), ...(str("prioridade") !== undefined && { priority: str("prioridade") as Priority }), ...(typeof c.concluida === "boolean" && { done: c.concluida }), ...(projeto && { projectId: projectRef(projeto).id }) }); }
+          else { const x = find(store.tasks, alvo ?? "", v => v.title); if (operacao === "excluir") store.deleteTask(x.id); else store.updateTask(x.id, { ...(str("titulo") !== undefined && { title: str("titulo") }), ...(str("prazo") !== undefined && { dueDate: str("prazo") }), ...(str("prioridade") !== undefined && { priority: str("prioridade") as Priority }), ...(typeof c.concluida === "boolean" && { done: c.concluida }), ...(projeto && { projectId: projectRef(projeto).id }) } as Partial<Task>); }
         } else if (entidade === "recebimento") {
           const status = str("status"); const valid = ["Pago", "A receber", "Atrasado"] as const;
           if (status && !valid.includes(status as typeof valid[number])) throw Error("Status financeiro inválido.");
