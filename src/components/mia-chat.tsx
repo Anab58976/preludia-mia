@@ -405,7 +405,7 @@ export function MiaChat() {
 
           {pending && <div className="border-t bg-blue-soft/60 p-3 text-sm">
             <p className="font-semibold">Confirmar ação da Mia {queue.length > 1 ? `(1 de ${queue.length})` : ""}</p>
-            <p className="my-2 text-xs">{pending.kind === "generic" ? `${pending.operacao} ${pending.entidade}: ${pending.alvo || pending.campos.nome || pending.campos.titulo || pending.campos.descricao || "novo registro"}` : `${pending.kind === "project" ? "Criar projeto" : "Criar tarefa"}: ${pending.title}`}</p>
+            <p className="my-2 text-xs">{pending.kind === "generic" ? `${pending.operacao} ${pending.entidade}: ${pending.alvo || pending.campos["nome"] || pending.campos["titulo"] || pending.campos["descricao"] || "novo registro"}` : `${pending.kind === "project" ? "Criar projeto" : "Criar tarefa"}: ${pending.title}`}</p>
             {pending.kind === "generic" && <pre className="max-h-28 overflow-auto whitespace-pre-wrap text-xs">{JSON.stringify(pending.campos, null, 2)}</pre>}
             <div className="flex gap-2"><button type="button" className="rounded-lg bg-ink px-3 py-2 text-xs text-ink-foreground" onClick={confirmar}>Confirmar e salvar</button><button type="button" onClick={retirar} className="rounded-lg border px-3 py-2 text-xs">Cancelar</button></div>
           </div>}
