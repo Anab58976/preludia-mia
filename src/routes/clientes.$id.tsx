@@ -1,4 +1,8 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Pencil, Trash2 } from "lucide-react";
+import { ClientEditor } from "@/components/client-editor";
 import { ArrowLeft, Mail, MapPin, Phone } from "lucide-react";
 
 import { MiaAvatar } from "@/components/mia-avatar";
@@ -27,6 +31,8 @@ export const Route = createFileRoute("/clientes/$id")({
 function DetalheCliente() {
   const { id } = Route.useParams();
   const store = useStore();
+  const [editing, setEditing] = useState(false);
+  const navigate = useNavigate();
 
   const client = store.clientById(id);
   if (!client) throw notFound();
@@ -46,7 +52,9 @@ function DetalheCliente() {
         <ArrowLeft className="size-4" /> Clientes
       </Link>
 
+      <ClientEditor open={editing} onOpenChange={setEditing} client={client} />
       <header className="rounded-xl border bg-card p-6">
+        <div className="mb-4 flex flex-wrap gap-2"><button type="button" onClick={() => setEditing(true)} className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs"><Pencil className="size-3.5"/> Editar cliente</button><button type="button" onClick={() => { if (!window.confirm("Excluir este cliente?")) return; if (!store.deleteClient(client.id)) { toast.error("Este cliente possui projetos. Exclua ou transfira os projetos primeiro."); return; } void navigate({to:"/clientes"}); toast.success("Cliente excluído."); }} className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs text-destructive"><Trash2 className="size-3.5"/> Excluir</button></div>
         <h1 className="text-2xl font-semibold">{client.name}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Contato principal: {client.contact} · cliente desde {fullDate(client.since)}

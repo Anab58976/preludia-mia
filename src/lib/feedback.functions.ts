@@ -28,32 +28,36 @@ Escreva tudo em português do Brasil.`;
 export const analisarFeedback = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => Input.parse(data))
   .handler(async ({ data }): Promise<FeedbackAnalysis> => {
-    const apiKey = process.env["LOVABLE_API_KEY"];
-    if (!apiKey) throw new Error("Configuração de IA ausente");
+    const openaiKey = process.env["OPENAI_API_KEY"]?.trim();
+    const lovableKey = process.env["LOVABLE_API_KEY"]?.trim();
+    if (!openaiKey && !lovableKey) {
+      throw new Error("Mia sem conexão com IA. Configure OPENAI_API_KEY em .env.local. Consulte CONFIGURAR-MIA.md.");
+    }
 
     const { createOpenAI } = await import("@ai-sdk/openai");
     const { streamText } = await import("ai");
-
-    const lovable = createOpenAI({
-      baseURL: "https://ai.gateway.lovable.dev/v1",
-      apiKey,
-      headers: {
-        "Lovable-API-Key": apiKey,
-        "X-Lovable-AIG-SDK": "vercel-ai-sdk",
-      },
-    });
+    const usingLovable = !openaiKey;
+    const ai = usingLovable
+      ? createOpenAI({
+          baseURL: "https://ai.gateway.lovable.dev/v1",
+          apiKey: lovableKey,
+          headers: {
+            "Lovable-API-Key": lovableKey!,
+            "X-Lovable-AIG-SDK": "vercel-ai-sdk",
+          },
+        })
+      : createOpenAI({ apiKey: openaiKey });
+    const modelName = usingLovable
+      ? process.env["LOVABLE_AI_MODEL"]?.trim() || "openai/gpt-6-astra"
+      : process.env["OPENAI_MODEL"]?.trim() || "gpt-4.1-mini";
 
     const result = streamText({
-      model: lovable.responses("openai/gpt-6-astra"),
+      model: ai.responses(modelName),
       system: PROMPT,
       prompt: `Projeto: ${data.projeto}\n\nMensagem do cliente:\n"""${data.texto}"""`,
-      providerOptions: {
-        openai: {
-          forceReasoning: true,
-          reasoningEffort: "low",
-          store: false,
-        },
-      },
+      providerOptions: usingLovable
+        ? { openai: { forceReasoning: true, reasoningEffort: "low", store: false } }
+        : { openai: { store: false } },
     });
 
     const text = await result.text;

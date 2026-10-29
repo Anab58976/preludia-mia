@@ -30,6 +30,7 @@ export type Task = {
 
 export type ProjectFile = {
   id: string;
+  version?: number;
   projectId: string;
   name: string;
   category: FileCategory;
@@ -374,6 +375,7 @@ export const payments: Payment[] = [
   { id: "pay5", projectId: "p3", description: "Arranjo Beira de Rio — 50%", amount: 2100, date: "2026-08-02", status: "Pago" },
   { id: "pay6", projectId: "p3", description: "Arranjo Beira de Rio — saldo", amount: 2100, date: "2026-08-28", status: "Atrasado" },
   { id: "pay7", projectId: "p5", description: "Missa Brevis — pagamento final", amount: 7500, date: "2026-07-31", status: "Pago" },
+  { id: "pay11", projectId: "p5", description: "Missa Brevis — adiantamento", amount: 7500, date: "2026-04-15", status: "Pago" },
   { id: "pay8", projectId: "p7", description: "Redução Cortejo — sinal", amount: 1800, date: "2026-08-06", status: "Pago" },
   { id: "pay9", projectId: "p7", description: "Redução Cortejo — saldo", amount: 1800, date: "2026-09-20", status: "A receber" },
   { id: "pay10", projectId: "p4", description: "Mixagem Noturno — sinal", amount: 6000, date: "2026-09-25", status: "A receber" },

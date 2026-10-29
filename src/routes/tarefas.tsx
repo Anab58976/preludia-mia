@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { FileAudio, FileText, Music2, Package, Plus } from "lucide-react";
+import { FileAudio, FileText, Music2, Package, Plus, Pencil, Trash2 } from "lucide-react";
+import { ProductionCalendar } from "@/components/production-calendar";
+import { downloadFile } from "@/lib/file-storage";
 import { toast } from "sonner";
 
 import { PriorityBadge } from "@/components/status-badge";
@@ -54,6 +56,7 @@ function Tarefas() {
   const [prazo, setPrazo] = useState(TODAY);
 
   const criar = () => {
+    if (!projetoId || !store.projectById(projetoId)) { toast.error("Cadastre um projeto primeiro."); return; }
     if (!titulo.trim()) {
       toast.error("Escreva o que precisa ser feito.");
       return;
@@ -77,6 +80,7 @@ function Tarefas() {
         </p>
       </header>
 
+      <ProductionCalendar />
       <section className="rounded-xl border bg-card p-5">
         <div className="grid gap-3 md:grid-cols-[2fr_1.5fr_1fr_1fr_auto]">
           <input
@@ -140,7 +144,7 @@ function Tarefas() {
                   <p className="text-xs text-muted-foreground">{projeto?.title}</p>
                 </div>
                 <PriorityBadge priority={task.priority} />
-                <span className="text-xs text-muted-foreground">{deadlineLabel(task.dueDate)}</span>
+                <span className="text-xs text-muted-foreground">{deadlineLabel(task.dueDate)}</span><button type="button" title="Editar tarefa" onClick={() => { const title = window.prompt("Editar tarefa", task.title); if (title?.trim()) store.updateTask(task.id, { title: title.trim() }); }} className="rounded-lg border p-2"><Pencil className="size-3.5"/></button><button type="button" title="Excluir tarefa" onClick={() => { if (window.confirm("Excluir esta tarefa?")) store.deleteTask(task.id); }} className="rounded-lg border p-2 text-destructive"><Trash2 className="size-3.5"/></button>
               </li>
             );
           })}
@@ -162,7 +166,7 @@ function Tarefas() {
                 />
                 <span className="flex-1 text-sm text-muted-foreground line-through">
                   {task.title}
-                </span>
+                </span><button type="button" title="Excluir tarefa" onClick={() => { if (window.confirm("Excluir esta tarefa?")) store.deleteTask(task.id); }} className="rounded-lg border p-2 text-destructive"><Trash2 className="size-3.5"/></button>
               </li>
             ))}
           </ul>
@@ -186,7 +190,7 @@ function Tarefas() {
                   {arquivos.length === 0 && <li className="text-sm">Nada por aqui ainda.</li>}
                   {arquivos.map((file) => (
                     <li key={file.id} className="text-sm">
-                      <p className="truncate">{file.name}</p>
+                      <button className="max-w-full truncate text-left text-primary hover:underline" type="button" onClick={() => void downloadFile(file.id,file.name).catch(() => toast.error("Arquivo de exemplo: sem conteúdo para download."))}>{file.name}</button>
                       <p className="text-xs text-muted-foreground">
                         {store.projectById(file.projectId)?.title} · {file.size} ·{" "}
                         {fullDate(file.updatedAt)}
